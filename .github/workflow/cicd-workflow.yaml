@@ -1,0 +1,38 @@
+name: DOKKU-Home-Site
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+      - uses: actions/checkout@v3
+      - name: Fetching dependencies
+        run : go get -v -t -d ./...
+      - name: Execute test
+        run : make test
+      - name: Install SSH Keys
+        run : |
+          mkdir -p /home/runner/.ssh
+          # Replace example.com with the hostname of the machine
+          # you're SSH-ing into
+          ssh-keyscan example.com >> /home/runner/.ssh/known_hosts
+          # DOKKU_SSH_KEY is the name of the repository secret
+          echo "${{ secrets.DOKKU_SSH_KEY }}" > /home/runner/.ssh/github_actions
+          chmod 600 /home/runner/.ssh/github_actions
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null	
+          ssh-add /home/runner/.ssh/github_actions
+      - name: Commit Code to DOKKU
+        run : |
+          git config --global user.name 'CICD Pusher'
+          git config --global user.email 'cicd-pusher@home.solarch.work'
+          git add dist --force
+          git commit -am "Automated CICD"
+          git remote add dokku dokku@solarch.work:solarch.work
+          git push -f dokku main
