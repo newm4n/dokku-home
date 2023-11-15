@@ -17,22 +17,8 @@ jobs:
         run : go get -v -t -d ./...
       - name: Execute test
         run : make test
-      - name: Install SSH Keys
-        run : |
-          mkdir -p /home/runner/.ssh
-          # Replace example.com with the hostname of the machine
-          # you're SSH-ing into
-          ssh-keyscan example.com >> /home/runner/.ssh/known_hosts
-          # DOKKU_SSH_KEY is the name of the repository secret
-          echo "${{ secrets.DOKKU_SSH_KEY }}" > /home/runner/.ssh/github_actions
-          chmod 600 /home/runner/.ssh/github_actions
-          ssh-agent -a $SSH_AUTH_SOCK > /dev/null	
-          ssh-add /home/runner/.ssh/github_actions
-      - name: Commit Code to DOKKU
-        run : |
-          git config --global user.name 'CICD Pusher'
-          git config --global user.email 'cicd-pusher@home.solarch.work'
-          git add dist --force
-          git commit -am "Automated CICD"
-          git remote add dokku dokku@solarch.work:solarch.work
-          git push -f dokku main
+      - name: Push to dokku
+        uses: dokku/github-action@master
+        with:
+          git_remote_url: 'ssh://dokku@solarch.work/solarch.work'
+          ssh_private_key: ${{ secrets.DOKKU_SSH_KEY }}
