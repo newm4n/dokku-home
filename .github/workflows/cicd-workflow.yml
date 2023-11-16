@@ -22,3 +22,4 @@ jobs:
         with:
           git_remote_url: 'ssh://dokku@solarch.work:22/solarch.work'
           ssh_private_key: ${{ secrets.DOKKU_SSH_KEY }}
+          branch: main
