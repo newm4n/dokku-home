@@ -14,3 +14,14 @@ func TestExist(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, fstat)
 }
+
+func TestGetActualPath(t *testing.T) {
+	assert.Equal(t, "https://www.yahoo.com/", GetActualPath("/api/yahoo", "/api/yahoo", "https://www.yahoo.com", "/"))
+	assert.Equal(t, "https://www.yahoo.com/one", GetActualPath("/api/yahoo/one", "/api/yahoo", "https://www.yahoo.com", "/"))
+	assert.Equal(t, "https://www.yahoo.com/one/two/three", GetActualPath("/api/yahoo/one/two/three", "/api/yahoo", "https://www.yahoo.com", "/"))
+
+	assert.Equal(t, "https://www.yahoo.com/abc", GetActualPath("/api/yahoo", "/api/yahoo", "https://www.yahoo.com", "/abc"))
+	assert.Equal(t, "https://www.yahoo.com/abc/one", GetActualPath("/api/yahoo/one", "/api/yahoo", "https://www.yahoo.com", "/abc"))
+	assert.Equal(t, "https://www.yahoo.com/abc/one/two/three", GetActualPath("/api/yahoo/one/two/three", "/api/yahoo", "https://www.yahoo.com", "/abc"))
+
+}

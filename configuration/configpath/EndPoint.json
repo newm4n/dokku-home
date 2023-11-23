@@ -1,0 +1,10 @@
+{
+  "Version": "1.0",
+  "EncPoints": [
+    {
+      "PathPrefix": "/api/yahoo",
+      "URLHost": "https://yahoo.com",
+      "URLPathPrefix": "/"
+    }
+  ]
+}

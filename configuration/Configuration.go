@@ -1,8 +1,11 @@
 package configuration
 
 import (
+	_ "embed"
+	"encoding/json"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -28,6 +31,7 @@ func initialize() {
 	defCfg["server.timeout.idle"] = "60 seconds"
 
 	defCfg["server.timeout.graceshut"] = "15 seconds"
+	defCfg["config.path"] = "/path/to/config.json"
 
 	for k := range defCfg {
 		err := viper.BindEnv(k)
@@ -98,4 +102,58 @@ func GetFloat(key string) float64 {
 // Set configuration key value
 func Set(key, value string) {
 	defCfg[key] = value
+}
+
+var (
+	backendCache *ConfigurationFile
+)
+
+func GetEndPoint() []*BackendEnd {
+	return loadEndPoint().EncPoints
+}
+
+var (
+	//go:embed configpath/EndPoint.json
+	EndPointStr []byte
+)
+
+func loadEndPoint() *ConfigurationFile {
+	configPth := Get("config.path")
+	fInfo, err := os.Stat(configPth)
+	if err != nil || fInfo.IsDir() {
+		log.Warnf("loading from default config")
+		defaultEp := &ConfigurationFile{}
+		err := json.Unmarshal(EndPointStr, defaultEp)
+		if err != nil {
+			log.Errorf("got error %s while loading defaylt config", err)
+			return &ConfigurationFile{}
+		}
+		backendCache = defaultEp
+		return defaultEp
+	}
+	fileBytes, err := os.ReadFile(configPth)
+	if err != nil {
+		log.Warnf("loading from default config because of %s", err.Error())
+		defaultEp := &ConfigurationFile{}
+		err := json.Unmarshal(EndPointStr, defaultEp)
+		if err != nil {
+			log.Errorf("got error %s while loading defaylt config", err)
+			return &ConfigurationFile{}
+		}
+		backendCache = defaultEp
+		return defaultEp
+	}
+	log.Infof("loading config from %s", configPth)
+	fileEP := &ConfigurationFile{}
+	err = json.Unmarshal(fileBytes, fileEP)
+	if err != nil {
+		log.Errorf("got error %s while loading config from %s", err, configPth)
+		return &ConfigurationFile{}
+	}
+	if fileEP.Version != "1.0" {
+		log.Errorf("configuration %s is not version 1.0", configPth)
+		return &ConfigurationFile{}
+	}
+	backendCache = fileEP
+	return fileEP
 }
