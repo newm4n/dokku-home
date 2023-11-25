@@ -1,10 +1,11 @@
-module github.com/newm4n/dokku-home
+module dokku-home
 
 go 1.21
 
 require (
 	github.com/gabriel-vasile/mimetype v1.4.3
 	github.com/hyperjumptech/jiffy v1.0.0
+	github.com/newm4n/dokku-home v0.0.0-20231123084242-cb7043657965
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.17.0
 	github.com/stretchr/testify v1.8.4
