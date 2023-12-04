@@ -1,6 +1,6 @@
 package main
 
-import "github.com/newm4n/dokku-home/internal"
+import "dokku-home/internal"
 
 func main() {
 	internal.Start()
